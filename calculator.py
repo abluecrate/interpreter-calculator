@@ -3,6 +3,8 @@
 # 3. Find expected token sequence and confirm structure
 # 4. Perform addition and substraion of single-digit integers
 
+# https://ruslanspivak.com/lsbasi-part1/
+
 INTEGER, OPERATOR, EOF = 'INTEGER', 'OPERATOR', 'EOF'
 
 
