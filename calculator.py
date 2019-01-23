@@ -18,7 +18,7 @@ class Token(object):
         return 'Token({type},{value})'.format(type = self.type, value = repr(self.value))
 
     def __repr__(self):
-        return(self.__str__())
+        return self.__str__()
 
 
 class Interpreter(object):
@@ -27,24 +27,51 @@ class Interpreter(object):
         self.text = text            # Client String Input
         self.pos = 0                # Index into self.text
         self.currentToken = None    # Current Token Instance
+        self.currentChar = self.text[self.pos]
 
     def error(self):
         raise Exception('Error Parsing Input')
 
+    def advance(self):
+        self.pos += 1
+        if self.pos > len(self.text) - 1:
+            self.currentChar = None
+        else:
+            self.currentChar = self.text[self.pos]
+
+    def skipSpace(self):
+        while self.currentChar is not None and self.currentChar.isspace():
+            self.advance()
+
+    def integer(self):
+
+        result = ''
+
+        while self.currentChar is not None and self.currentChar.isdigit():
+            result += self.currentChar
+            self.advance()
+
+        return int(result)
+
     def getNextToken(self):             # Lexical Analyzer: breaking sentence into tokens
-        text = self.text                
-        if self.pos > len(text) - 1:    # Check if index is past end
-            return Token(EOF, None)     # Return EOF
-        currentChar = text[self.pos]    # Get character at position
-        if currentChar.isdigit():                       # Check if character is digit
-            token = Token(INTEGER, int(currentChar))    # Create INTEGER token
-            self.pos += 1                               # Move one position
-            return token
-        elif currentChar == '+' or currentChar == '-':                          # Check if character is plus
-            token = Token(OPERATOR, currentChar)        # Create OPERATOR token
-            self.pos += 1                               # Move one position
-            return token
-        self.error()
+
+        while self.currentChar is not None:
+
+            if self.currentChar.isspace():
+                self.skipSpace()
+                continue
+
+            if self.currentChar.isdigit():
+                return Token(INTEGER, self.integer())
+
+            if self.currentChar == '+' or self.currentChar == '-':    # Check if character is operator
+                token = Token(OPERATOR, self.currentChar)             # Create OPERATOR token
+                self.advance()
+                return token
+                
+            self.error()
+
+        return Token(EOF, None)
 
     def eat(self, tokenType):
         if self.currentToken.type == tokenType:
@@ -62,10 +89,11 @@ class Interpreter(object):
         self.eat(INTEGER)
         if op.value == '+':
             result = left.value + right.value               # Add integers
-            return result
         elif op.value == '-':
             result = left.value - right.value               # Subtract integers
-            return result
+        else:
+            raise Exception('OPERATION NOT SUPPORTED')
+        return result
 
 
 def main():
