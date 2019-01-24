@@ -64,7 +64,7 @@ class Interpreter(object):
             if self.currentChar.isdigit():
                 return Token(INTEGER, self.integer())
 
-            if self.currentChar == '+' or self.currentChar == '-':    # Check if character is operator
+            if self.currentChar in ['+','-','*','x','/']:                           # Check if character is operator
                 token = Token(OPERATOR, self.currentChar)             # Create OPERATOR token
                 self.advance()
                 return token
@@ -81,24 +81,33 @@ class Interpreter(object):
 
     def expr(self):                                     # INTEGER + INTEGER
         self.currentToken = self.getNextToken()         # Set current token to first token from input
+
         left = self.currentToken                        # Expect single-digit integer token
-        self.eat(INTEGER)                               
+        self.eat(INTEGER)
+
         op = self.currentToken                          # Expect operator token
         self.eat(OPERATOR)
+
         right = self.currentToken                       # Expect single-digit integer token
         self.eat(INTEGER)
+
         if op.value == '+':
             result = left.value + right.value               # Add integers
         elif op.value == '-':
             result = left.value - right.value               # Subtract integers
+        elif op.value in ['*','x']:
+            result = left.value * right.value               # Multiply integers
+        elif op.value == '/':
+            result = left.value / right.value               # Divide integers
         else:
             raise Exception('OPERATION NOT SUPPORTED')
         return result
 
 
 def main():
+    print('------------')
     while True:
-        try:
+        try:    
             text = input('Calculator > ')    # Gather input
         except EOFError:
             break
@@ -107,7 +116,7 @@ def main():
         interpreter = Interpreter(text)     # Initialize interpreter
         result = interpreter.expr()         # Get result
         print(result)
-
+        print('------------')
 
 if __name__ == '__main__':
     main()  # Run Calculator
